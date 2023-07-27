@@ -7,7 +7,7 @@
 
 主要通过numpy的广播机制加速运算
 
-向量化实现原理：$(a - b)^2 = a^2 + b^2 - 2ab$
+向量化实现原理：<img src="http://latex.codecogs.com/gif.latex?$(a - b)^2 = a^2 + b^2 - 2ab$>
 
 $a$为测试集样本，维度 (M, D)
 
