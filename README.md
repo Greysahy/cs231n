@@ -23,19 +23,9 @@ L2-distance = -2 * ab + a2 + b2  # 维度(M, N)
 reshape之后，$a^2$和$b^2$就都满足了广播的条件，可以直接计算L2-distance
 
 **2. SVM loss的两种实现方式：循环和向量化实现**
-$$
-SVM\ loss = 
-\left\{
-\begin{aligned}
-%\nonumber
-0\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {s_i  + 1(1为阈值) < s_j}\\
-s_i - s_j + 1\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \  \ \ \ \ \ \ \ \ {else}\\
-\end{aligned}
-\right.
-\\
-\frac{\partial{L}}{\partial{s_i}} = 1, \frac{\partial{L}}{\partial{s_j}} = -1(损失不为0时) \\
-\frac{\partial{L}}{\partial{w_i}} = \frac{\partial{L}}{\partial{s_i}} \cdot \frac{\partial{s_i}}{\partial{w_i}} = \pm1 \cdot x_i 
-$$
+
+![svm](https://github.com/Greysahy/cs231n/blob/main/images/svm.png)
+
 **SVM损失值与梯度值计算的向量化实现**
 
 ```python
@@ -98,16 +88,9 @@ def svm_loss_vectorized(W, X, y, reg):
 ```
 
 **3. Softmax loss的两种实现方式：循环和向量化实现**
-$$
-Softmax\ loss = -ln({y_j}\cdot p_j),y_j = 1,  p_j = \frac{e^{s_j}}{\sum_ke^{s_k}} \\
-\frac{\partial{L}}{\partial{p_j}} = -\frac{1}{p_j}\\
-对标签类别分数s_j的导数 = \frac{\partial{p_j}}{\partial{s_j}} = \frac{e^{s_j} \cdot (\sum_ke^{s_k} - e^{s_j})}{(\sum_ke^{s_k})^2} = p_j \cdot (1 - p_j) \\
-对非标签类别分数s_i的导数 = \frac{\partial{p_j}}{\partial{s_i}} = \frac{0 \cdot \sum_ke^{s_k} - e^{s_j} \cdot e^{s_i}}{(\sum_ke^{s_k})^2} = -p_i p_j \\
-\frac{\partial{s_i}}{\partial{w_i}} = x_i \\
-根据链式法则： \\
-\frac{\partial{L}}{\partial{w_j}} = -\frac{1}{p_j} \cdot p_j \cdot (1 - p_j) \cdot x_i = p_j - 1\\
-\frac{\partial{L}}{\partial{w_i}} = -\frac{1}{p_j} \cdot (-p_i  p_j) \cdot x_i = p_i
-$$
+
+![softmax](https://github.com/Greysahy/cs231n/blob/main/images/softmax.png)
+
 **Softmax损失值与梯度值计算的向量化实现**
 
 ```python
