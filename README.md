@@ -1,148 +1,30 @@
-# cs231n
-2023年夏 cs231n计算机视觉课程学习记录
+# cs231n 
 
-## assignment 1
+### 2023年夏 cs231n计算机视觉课程学习记录
 
-**1. KNN（L2-distance）的三种实现方式：双层循环，单层循环，无循环向量化实现**
+### assignment 1
 
-主要通过numpy的广播机制加速运算
+- [x] 实现K-Nearest-Neighbot分类器进行图像分类 
+- [x] 实现SVM loss的损失值以及梯度计算
+- [x] 实现Softmax loss的损失值以及梯度计算
+- [x] 实现双层全连接神经网络
+- [x] 使用比原始像素更高级的特征作为输入
 
-向量化实现原理：$(a - b)^2 = a^2 + b^2 - 2ab$
+### assignment 2
 
-$a$为测试集样本，维度 (M, D)
+- [ ] 实现任意深度的全连接神经网络与优化器
+- [ ] 实现Batch Normalization
+- [ ] 实现Dropout
+- [ ] 实现卷积神经网络中的不同layer
+- [ ] 使用Pytorch实现一个卷积神经网络并在CIFAR-10上进行训练
 
-$b$为训练集样本，维度 (N, D)
+### assignment 3
 
-```python
-ab = np.dot(a, b.T) # 维度(M， N)
-a2 = np.sum(np.square(a), axis=1).reshape(M, 1)
-b2 = np.sum(np.square(b), axis=1).reshape(1, N)
-L2-distance = -2 * ab + a2 + b2  # 维度(M, N)
-```
+- [ ] 计算图像梯度并利用其产生显著图(saliency maps)和虚假图(fooling images)
+- [ ] 了解朴素循环神经网络(vanilla RNN)的实现，并将其应用于COCO上的图像描述任务
+- [ ] 了解Transformer模型的实现，并将其应用于COCO上的图像描述任务
+- [ ] 学习如何生成与训练数据集匹配的图像，并在对大量未标记数据和少量标记数据进行训练时使用这些模型来提高分类器性能。
+- [ ] 利用自监督(Self-Supervised Learning)预训练获得更好的性能
 
-reshape之后，$a^2$和$b^2$就都满足了广播的条件，可以直接计算L2-distance
 
-**2. SVM loss的两种实现方式：循环和向量化实现**
 
-![svm](https://github.com/Greysahy/cs231n/blob/main/images/svm.png)
-
-**SVM损失值与梯度值计算的向量化实现**
-
-```python
-def svm_loss_vectorized(W, X, y, reg):
-    """
-    Structured SVM loss function, vectorized implementation.
-    Inputs:
-        - W: A numpy array of shape (D, C) containing weights.
-        - X: A numpy array of shape (N, D) containing a minibatch of data.
-        - y: A numpy array of shape (N,) containing training labels; y[i] = c means
-          that X[i] has label c, where 0 <= c < C.
-        - reg: (float) regularization strength
-
-        Returns a tuple of:
-        - loss as single float
-        - gradient with respect to weights W; an array of same shape as W
-	"""
-    loss = 0.0
-    dW = np.zeros(W.shape)  # initialize the gradient as zero
-
-    #############################################################################
-    # TODO:                                                                     #
-    # Implement a vectorized version of the structured SVM loss, storing the    #
-    # result in loss.                                                           #
-    #############################################################################
-    # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-	# 计算损失
-    num_train = X.shape[0]  
-    scores = np.dot(X, W)  # (N, C)
-    correct_class_score = scores[np.arange(num_train), y].reshape(num_train, 1)  # 标签类别对应的分数,(N, ) 
-    
-    margins = scores - correct_class_score + 1.0  # si - sj + 1,(N, C)
-    margins[np.arange(num_train), y] = 0  # 对于标签类别不计算损失
-    margins[margins < 0] = 0.0  # 将小于0的损失值计为0
-    
-    loss = np.sum(margins) / num_train
-    loss += 0.5 * reg * np.sum(W * W)  # L2正则， 为了抵消梯度的正则系数，乘0.5
-
-    # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    #############################################################################
-    # TODO:                                                                     #
-    # Implement a vectorized version of the gradient for the structured SVM     #
-    # loss, storing the result in dW.                                           #
-    #                                                                           #
-    # Hint: Instead of computing the gradient from scratch, it may be easier    #
-    # to reuse some of the intermediate values that you used to compute the     #
-    # loss.                                                                     #
-    #############################################################################
-    # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    margins[margins > 0] = 1.0  # si对si-sj+1求导为1
-    x_count = np.sum(margins, axis=1)  # 对每一个样本，有多少类别的分数计算了si-sj+1的损失
-    margins[np.arange(num_train), y] -= x_count  # 标签类别对损失累计一个 -1 的梯度（sj对si-sj+1求导）
-    dW = np.dot(X.T, margins) /num_train # s = xi * wi，对参数w求导=x,因
-    dW = dW + reg * W  # L2正则
-    # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    return loss, dW
-```
-
-**3. Softmax loss的两种实现方式：循环和向量化实现**
-
-![softmax](https://github.com/Greysahy/cs231n/blob/main/images/softmax.png)
-
-**Softmax损失值与梯度值计算的向量化实现**
-
-```python
-def softmax_loss_vectorized(W, X, y, reg):
-    """
-    Softmax loss function, naive implementation (with loops)
-
-    Inputs have dimension D, there are C classes, and we operate on minibatches
-    of N examples.
-
-    Inputs:
-    - W: A numpy array of shape (D, C) containing weights.
-    - X: A numpy array of shape (N, D) containing a minibatch of data.
-    - y: A numpy array of shape (N,) containing training labels; y[i] = c means
-      that X[i] has label c, where 0 <= c < C.
-    - reg: (float) regularization strength
-
-    Returns a tuple of:
-    - loss as single float
-    - gradient with respect to weights W; an array of same shape as W
-    """
-    # Initialize the loss and gradient to zero.
-    loss = 0.0
-    dW = np.zeros_like(W)
-
-    #############################################################################
-    # TODO: Compute the softmax loss and its gradient using no explicit loops.  #
-    # Store the loss in loss and the gradient in dW. If you are not careful     #
-    # here, it is easy to run into numeric instability. Don't forget the        #
-    # regularization!                                                           #
-    #############################################################################
-    # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    num_train = X.shape[0]
-    num_class = W.shape[1]
-
-    # compute loss
-    scores = np.exp(np.dot(X, W))  # exp(s_i)， (N, C)
-    p = scores / np.sum(scores, axis=1).reshape(num_train, 1)  #计算出每一个类别的概率p_i (N, C)
-    loss += np.sum(-np.log(p[np.arange(num_train), y]))  # 按照公式，损失值等于标签类别概率的负ln值
-    
-    # compute gradient
-    # dW (D, C) X(N, D) 
-    p[np.arange(num_train), y] -= 1  # 标签类别的梯度等于当前类别概率 - 1， 非标签类别的梯度等于当前类别概率
-    dW += np.dot(X.T, p)  # 根据公式乘x计算损失对参数w的梯度
-
-    loss /= num_train
-    loss += 0.5 * reg * np.sum(W * W)  # L2正则
-    dW /= num_train
-    dW += reg * W  # l2正则
-
-    # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
-    return loss, dW
-```
