@@ -1,6 +1,6 @@
 # cs231n 
 
-### 2023年夏 cs231n计算机视觉课程学习记录
+### 2023 cs231n assignment
 
 ### assignment 1
 
@@ -12,7 +12,7 @@
 
 ### assignment 2
 
-- [ ] 实现任意深度的全连接神经网络与优化器
+- [x] 实现任意深度的全连接神经网络与优化器
 - [ ] 实现Batch Normalization
 - [ ] 实现Dropout
 - [ ] 实现卷积神经网络中的不同layer
