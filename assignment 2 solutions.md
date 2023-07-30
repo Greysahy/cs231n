@@ -439,7 +439,7 @@ def batchnorm_forward(x, gamma, beta, bn_param):
 
 画出计算图，依照链式法则计算梯度：
 
-
+![bncomputegraph](https://github.com/Greysahy/cs231n/blob/main/images/compute%20graph.png)
 
 ```python
 def batchnorm_backward(dout, cache):
