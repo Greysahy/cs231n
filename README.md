@@ -13,7 +13,7 @@
 ### assignment 2
 
 - [x] 实现任意深度的全连接神经网络与优化器
-- [ ] 实现Batch Normalization
+- [x] 实现Batch Normalization
 - [ ] 实现Dropout
 - [ ] 实现卷积神经网络中的不同layer
 - [ ] 使用Pytorch实现一个卷积神经网络并在CIFAR-10上进行训练
